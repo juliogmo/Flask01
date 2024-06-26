@@ -9,7 +9,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # Cargar el modelo entrenado
-model = joblib.load('modeloRF.pkl')
+model = joblib.load('RandomForest2.pkl')
 app.logger.debug('Modelo cargado correctamente.')
 
 @app.route('/')
@@ -20,16 +20,16 @@ def home():
 def predict():
     try:
         # Obtener los datos enviados en el request
-        battery_power = float(request.form['battery_power'])
-        int_memory = float(request.form['int_memory'])
-        mobile_wt = float(request.form['mobile_wt'])
-        px_height = float(request.form['px_height'])
-        px_width = float(request.form['px_width'])
-        ram = float(request.form['ram'])
+        non_urgent_order = float(request.form['non_urgent_order'])
+        urgent_order = float(request.form['urgent_order'])
+        order_type_b = float(request.form['order_type_b'])
+        order_type_c = float(request.form['order_type_c'])
         
-        # Crear un DataFrame con los datos
-        data_df = pd.DataFrame([[battery_power, int_memory, mobile_wt, px_height, px_width, ram]], 
-                               columns=['battery_power', 'int_memory', 'mobile_wt', 'px_height', 'px_width', 'ram'])
+        # Crear un DataFrame con los datos usando los nombres de características correctos
+        data_df = pd.DataFrame(
+            [[non_urgent_order, urgent_order, order_type_b, order_type_c]], 
+            columns=['Non-urgent order', 'Urgent order', 'Order type B', 'Order type C']
+        )
         app.logger.debug(f'DataFrame creado: {data_df}')
         
         # Realizar predicciones
@@ -37,10 +37,10 @@ def predict():
         app.logger.debug(f'Predicción: {prediction[0]}')
         
         # Convertir la predicción a tipo de datos estándar de Python
-        prediction_result = int(prediction[0])
+        prediction_result = float(prediction[0])
         
         # Devolver las predicciones como respuesta JSON
-        return jsonify({'categoria': prediction_result})
+        return jsonify({'prediccion': prediction_result})
     except Exception as e:
         app.logger.error(f'Error en la predicción: {str(e)}')
         return jsonify({'error': str(e)}), 400

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Clasificador de Dispositivos Móviles</title>
+    <title>Daily Demand Forecasting Orders</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -9,7 +9,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 50%;
+            height: 100vh;
             margin: 0;
         }
         #contenedor {
@@ -17,29 +17,32 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            width: 300px;
-            text-align: center;
+            width: 400px;
         }
         h1 {
             color: #2c3e50;
             font-size: 24px;
             margin-top: 10px;
             margin-bottom: 20px;
+            text-align: center;
         }
-        label {
-            display: block;
-            margin: 5px 0;
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            flex: 1;
             font-weight: bold;
             color: #34495e;
-            text-align: left;
+            margin-right: 10px;
         }
-        input[type="text"] {
-            width: 100%;
+        .form-group input {
+            flex: 2;
             padding: 8px;
-            margin-bottom: 10px;
             border: 1px solid #bdc3c7;
             border-radius: 4px;
-            box-sizing: border-box;
         }
         input[type="submit"] {
             background-color: #2980b9;
@@ -49,6 +52,7 @@
             cursor: pointer;
             border-radius: 4px;
             font-size: 16px;
+            width: 100%;
         }
         input[type="submit"]:hover {
             background-color: #3498db;
@@ -57,48 +61,30 @@
             margin-top: 20px;
             font-weight: bold;
             color: #000000;
+            text-align: center;
         }
     </style>
     <script>
-        function clasificarDispositivo(event) {
+        function predecirOrdenes(event) {
             event.preventDefault();
-            const battery_power = document.getElementById('battery_power').value;
-            const int_memory = document.getElementById('int_memory').value;
-            const mobile_wt = document.getElementById('mobile_wt').value;
-            const px_height = document.getElementById('px_height').value;
-            const px_width = document.getElementById('px_width').value;
-            const ram = document.getElementById('ram').value;
+            const nonUrgentOrder = document.getElementById('non_urgent_order').value;
+            const urgentOrder = document.getElementById('urgent_order').value;
+            const orderTypeB = document.getElementById('order_type_b').value;
+            const orderTypeC = document.getElementById('order_type_c').value;
 
             fetch('/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `battery_power=${battery_power}&int_memory=${int_memory}&mobile_wt=${mobile_wt}&px_height=${px_height}&px_width=${px_width}&ram=${ram}`,
+                body: `non_urgent_order=${nonUrgentOrder}&urgent_order=${urgentOrder}&order_type_b=${orderTypeB}&order_type_c=${orderTypeC}`,
             })
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
                     document.getElementById('resultado').innerText = 'Error: ' + data.error;
                 } else {
-                    let categoriaDescripcion = '';
-                    switch(data.categoria) {
-                        case 0:
-                            categoriaDescripcion = 'bajo';
-                            break;
-                        case 1:
-                            categoriaDescripcion = 'medio bajo';
-                            break;
-                        case 2:
-                            categoriaDescripcion = 'medio alto';
-                            break;
-                        case 3:
-                            categoriaDescripcion = 'alto';
-                            break;
-                        default:
-                            categoriaDescripcion = 'desconocida';
-                    }
-                    document.getElementById('resultado').innerText = 'La categoría del dispositivo es: ' + data.categoria + ' "' + categoriaDescripcion + '"';
+                    document.getElementById('resultado').innerText = 'La predicción de órdenes totales es: ' + data.prediccion;
                 }
             })
             .catch(error => {
@@ -110,20 +96,24 @@
 </head>
 <body>
     <div id="contenedor">
-        <h1>Clasificador de Dispositivos Móviles</h1>
-        <form id="formulario" onsubmit="clasificarDispositivo(event)">
-            <label for="battery_power">Capacidad de la Batería:</label>
-            <input type="text" id="battery_power" name="battery_power"><br><br>
-            <label for="int_memory">Memoria Interna:</label>
-            <input type="text" id="int_memory" name="int_memory"><br><br>
-            <label for="mobile_wt">Peso del Móvil:</label>
-            <input type="text" id="mobile_wt" name="mobile_wt"><br><br>
-            <label for="px_height">Altura de Píxel:</label>
-            <input type="text" id="px_height" name="px_height"><br><br>
-            <label for="px_width">Ancho de Píxel:</label>
-            <input type="text" id="px_width" name="px_width"><br><br>
-            <label for="ram">Memoria RAM:</label>
-            <input type="text" id="ram" name="ram"><br><br>
+        <h1>Daily Demand Forecasting Orders</h1>
+        <form id="formulario" onsubmit="predecirOrdenes(event)">
+            <div class="form-group">
+                <label for="non_urgent_order">Órdenes no urgentes:</label>
+                <input type="text" id="non_urgent_order" name="non_urgent_order">
+            </div>
+            <div class="form-group">
+                <label for="urgent_order">Órdenes urgentes:</label>
+                <input type="text" id="urgent_order" name="urgent_order">
+            </div>
+            <div class="form-group">
+                <label for="order_type_b">Órdenes tipo B:</label>
+                <input type="text" id="order_type_b" name="order_type_b">
+            </div>
+            <div class="form-group">
+                <label for="order_type_c">Órdenes tipo C:</label>
+                <input type="text" id="order_type_c" name="order_type_c">
+            </div>
             <input type="submit" value="Enviar">
         </form>
         <p id="resultado"></p>
